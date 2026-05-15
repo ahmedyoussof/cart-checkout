@@ -1,5 +1,6 @@
 package com.cart.checkout.service;
 
+import com.cart.checkout.api.dto.AddItemRequest;
 import com.cart.checkout.domain.cart.Cart;
 import com.cart.checkout.exceptions.ResourceNotFoundException;
 import com.cart.checkout.repository.CartRepository;
@@ -32,5 +33,16 @@ public class CartService {
     public Cart find(UUID cartId) {
         return cartRepository.findById(cartId)
                 .orElseThrow(() -> new ResourceNotFoundException("Cart not found: " + cartId));
+    }
+
+    @Transactional
+    public Cart addItem(UUID cartId, AddItemRequest request) {
+        Cart cart = cartRepository.findById(cartId)
+                .orElseThrow(() -> new ResourceNotFoundException("Cart not found: " + cartId));
+        cart.addItem(request.productId(), request.quantity(), request.unitPrice());
+        Cart saved = cartRepository.save(cart);
+        log.info("Added item to cart {}: productId={} quantity={} newTotal={}",
+                saved.getId(), request.productId(), request.quantity(), saved.getTotal());
+        return saved;
     }
 }

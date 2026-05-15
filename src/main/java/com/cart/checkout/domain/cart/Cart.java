@@ -12,6 +12,8 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 
+import com.cart.checkout.exceptions.CartLockedException;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
@@ -34,7 +36,7 @@ public class Cart {
     @JoinColumn(name = "cart_id")
     private List<CartItem> items = new ArrayList<>();
 
-    @Column(name = "total_amount", nullable = false, precision = 19, scale = 2)
+    @Column(name = "total_amount", nullable = false, scale = 2)
     private BigDecimal total;
 
     @Version
@@ -58,6 +60,15 @@ public class Cart {
             return;
         }
         status = CartStatus.LOCKED;
+    }
+
+    public void addItem(UUID productId, int quantity, BigDecimal unitPrice) {
+        if (status == CartStatus.LOCKED) {
+            throw new CartLockedException("Cart " + id + " is locked and cannot be modified");
+        }
+        CartItem item = new CartItem(productId, quantity, unitPrice);
+        items.add(item);
+        this.total = total.add(item.getLineTotal());
     }
 
     public UUID getId() {

@@ -57,7 +57,7 @@ public class Cart {
 
     public void lock() {
         if (status == CartStatus.LOCKED) {
-            return;
+            throw new CartLockedException("Cart " + id + " is already locked");
         }
         status = CartStatus.LOCKED;
     }

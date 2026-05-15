@@ -51,14 +51,13 @@ class CartTest {
     }
 
     @Test
-    void lock_whenAlreadyLocked_shouldBeIdempotent() {
+    void lock_whenAlreadyLocked_shouldThrowCartLockedException() {
         Cart cart = Cart.create();
         cart.lock();
         assertEquals(CartStatus.LOCKED, cart.getStatus(), "precondition: cart is LOCKED");
 
-        cart.lock();
-
-        assertEquals(CartStatus.LOCKED, cart.getStatus());
+        CartLockedException ex = assertThrows(CartLockedException.class, cart::lock);
+        assertTrue(ex.getMessage().contains(cart.getId().toString()));
     }
 
     @Test

@@ -1,6 +1,7 @@
 package com.cart.checkout.domain.order;
 
 import com.cart.checkout.domain.cart.Cart;
+import com.cart.checkout.exceptions.InvalidOrderTransitionException;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -61,15 +62,27 @@ public class Order {
     }
 
     public void markPendingPayment() {
-        throw new UnsupportedOperationException("Not implemented yet");
+        if (status != OrderStatus.CREATED && status != OrderStatus.PAYMENT_FAILED) {
+            throw new InvalidOrderTransitionException(
+                    "Order " + id + " cannot transition from " + status + " to PENDING_PAYMENT");
+        }
+        status = OrderStatus.PENDING_PAYMENT;
     }
 
     public void markPaid() {
-        throw new UnsupportedOperationException("Not implemented yet");
+        if (status != OrderStatus.PENDING_PAYMENT) {
+            throw new InvalidOrderTransitionException(
+                    "Order " + id + " cannot transition from " + status + " to PAID");
+        }
+        status = OrderStatus.PAID;
     }
 
     public void markPaymentFailed() {
-        throw new UnsupportedOperationException("Not implemented yet");
+        if (status != OrderStatus.PENDING_PAYMENT) {
+            throw new InvalidOrderTransitionException(
+                    "Order " + id + " cannot transition from " + status + " to PAYMENT_FAILED");
+        }
+        status = OrderStatus.PAYMENT_FAILED;
     }
 
     public UUID getId() {

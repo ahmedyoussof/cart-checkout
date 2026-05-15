@@ -41,46 +41,6 @@
                     "response": []
                 },
                 {
-                    "name": "Get Cart",
-                    "event": [
-                        {
-                            "listen": "test",
-                            "script": {
-                                "exec": [
-                                    "if (pm.response.code === 200) {",
-                                    "    var jsonData = pm.response.json();",
-                                    "    if (jsonData.id) {",
-                                    "        pm.collectionVariables.set(\"cartId\", jsonData.id);",
-                                    "    }",
-                                    "}"
-                                ],
-                                "type": "text/javascript"
-                            }
-                        }
-                    ],
-                    "request": {
-                        "method": "GET",
-                        "header": [],
-                        "url": {
-                            "raw": "{{baseUrl}}/carts/:cartId",
-                            "host": [
-                                "{{baseUrl}}"
-                            ],
-                            "path": [
-                                "carts",
-                                ":cartId"
-                            ],
-                            "variable": [
-                                {
-                                    "key": "cartId",
-                                    "value": "{{cartId}}"
-                                }
-                            ]
-                        }
-                    },
-                    "response": []
-                },
-                {
                     "name": "Add Item",
                     "event": [
                         {
@@ -129,6 +89,278 @@
                         }
                     },
                     "response": []
+                },
+                {
+                    "name": "Get Cart",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 200) {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    if (jsonData.id) {",
+                                    "        pm.collectionVariables.set(\"cartId\", jsonData.id);",
+                                    "    }",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/carts/:cartId",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "carts",
+                                ":cartId"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "cartId",
+                                    "value": "{{cartId}}"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Checkout",
+            "item": [
+                {
+                    "name": "Checkout Cart",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"status is 201 Created\", function () {",
+                                    "    pm.response.to.have.status(201);",
+                                    "});",
+                                    "var jsonData = pm.response.json();",
+                                    "pm.test(\"order status is CREATED\", function () {",
+                                    "    pm.expect(jsonData.status).to.eql(\"CREATED\");",
+                                    "});",
+                                    "pm.test(\"cartId is preserved on the order\", function () {",
+                                    "    pm.expect(jsonData.cartId).to.eql(pm.collectionVariables.get(\"cartId\"));",
+                                    "});",
+                                    "if (jsonData.id) {",
+                                    "    pm.collectionVariables.set(\"orderId\", jsonData.id);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/carts/:cartId/checkout",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "carts",
+                                ":cartId",
+                                "checkout"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "cartId",
+                                    "value": "{{cartId}}"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Checkout Locked Cart (expect 409)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"status is 409 Conflict\", function () {",
+                                    "    pm.response.to.have.status(409);",
+                                    "});",
+                                    "pm.test(\"error code is CART_LOCKED\", function () {",
+                                    "    pm.expect(pm.response.json().code).to.eql(\"CART_LOCKED\");",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/carts/:cartId/checkout",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "carts",
+                                ":cartId",
+                                "checkout"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "cartId",
+                                    "value": "{{cartId}}"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Payment",
+            "item": [
+                {
+                    "name": "Start Payment",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"status is 200 OK\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "var jsonData = pm.response.json();",
+                                    "pm.test(\"payment status is INITIATED\", function () {",
+                                    "    pm.expect(jsonData.status).to.eql(\"INITIATED\");",
+                                    "});",
+                                    "pm.test(\"orderId is preserved on the payment\", function () {",
+                                    "    pm.expect(jsonData.orderId).to.eql(pm.collectionVariables.get(\"orderId\"));",
+                                    "});",
+                                    "pm.test(\"providerPaymentId is assigned\", function () {",
+                                    "    pm.expect(jsonData.providerPaymentId).to.be.a(\"string\").and.not.empty;",
+                                    "});",
+                                    "if (jsonData.paymentId) {",
+                                    "    pm.collectionVariables.set(\"paymentId\", jsonData.paymentId);",
+                                    "}",
+                                    "if (jsonData.providerPaymentId) {",
+                                    "    pm.collectionVariables.set(\"providerPaymentId\", jsonData.providerPaymentId);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/orders/:orderId/payment/start",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "orders",
+                                ":orderId",
+                                "payment",
+                                "start"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "orderId",
+                                    "value": "{{orderId}}"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Start Payment Already Pending (expect 409)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"status is 409 Conflict\", function () {",
+                                    "    pm.response.to.have.status(409);",
+                                    "});",
+                                    "pm.test(\"error code is INVALID_ORDER_TRANSITION\", function () {",
+                                    "    pm.expect(pm.response.json().code).to.eql(\"INVALID_ORDER_TRANSITION\");",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/orders/:orderId/payment/start",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "orders",
+                                ":orderId",
+                                "payment",
+                                "start"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "orderId",
+                                    "value": "{{orderId}}"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Start Payment Unknown Order (expect 404)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"status is 404 Not Found\", function () {",
+                                    "    pm.response.to.have.status(404);",
+                                    "});",
+                                    "pm.test(\"error code is NOT_FOUND\", function () {",
+                                    "    pm.expect(pm.response.json().code).to.eql(\"NOT_FOUND\");",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/orders/00000000-0000-0000-0000-000000000000/payment/start",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "orders",
+                                "00000000-0000-0000-0000-000000000000",
+                                "payment",
+                                "start"
+                            ]
+                        }
+                    },
+                    "response": []
                 }
             ]
         }
@@ -141,6 +373,21 @@
         },
         {
             "key": "cartId",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "orderId",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "paymentId",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "providerPaymentId",
             "value": "",
             "type": "string"
         }

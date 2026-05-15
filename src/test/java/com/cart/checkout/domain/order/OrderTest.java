@@ -2,6 +2,7 @@ package com.cart.checkout.domain.order;
 
 import com.cart.checkout.domain.cart.Cart;
 import com.cart.checkout.domain.cart.CartItem;
+import com.cart.checkout.exceptions.InvalidOrderTransitionException;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -96,5 +97,85 @@ class OrderTest {
         Order order = Order.fromCart(cart);
 
         assertThrows(UnsupportedOperationException.class, () -> order.getItems().add(null));
+    }
+
+    @Test
+    void markPendingPayment_fromCreated_shouldTransitionToPendingPayment() {
+        Order order = Order.fromCart(Cart.create());
+
+        order.markPendingPayment();
+
+        assertEquals(OrderStatus.PENDING_PAYMENT, order.getStatus());
+    }
+
+    @Test
+    void markPendingPayment_fromPendingPayment_shouldThrow() {
+        Order order = Order.fromCart(Cart.create());
+        order.markPendingPayment();
+
+        assertThrows(InvalidOrderTransitionException.class, order::markPendingPayment);
+    }
+
+    @Test
+    void markPendingPayment_fromPaymentFailed_shouldTransitionToPendingPayment() {
+        Order order = Order.fromCart(Cart.create());
+        order.markPendingPayment();
+        order.markPaymentFailed();
+
+        order.markPendingPayment();
+
+        assertEquals(OrderStatus.PENDING_PAYMENT, order.getStatus());
+    }
+
+    @Test
+    void markPendingPayment_fromPaid_shouldThrow() {
+        Order order = Order.fromCart(Cart.create());
+        order.markPendingPayment();
+        order.markPaid();
+
+        assertThrows(InvalidOrderTransitionException.class, order::markPendingPayment);
+    }
+
+    @Test
+    void markPaid_fromPendingPayment_shouldTransitionToPaid() {
+        Order order = Order.fromCart(Cart.create());
+        order.markPendingPayment();
+
+        order.markPaid();
+
+        assertEquals(OrderStatus.PAID, order.getStatus());
+    }
+
+    @Test
+    void markPaid_fromCreated_shouldThrow() {
+        Order order = Order.fromCart(Cart.create());
+
+        assertThrows(InvalidOrderTransitionException.class, order::markPaid);
+    }
+
+    @Test
+    void markPaid_fromPaid_shouldThrow() {
+        Order order = Order.fromCart(Cart.create());
+        order.markPendingPayment();
+        order.markPaid();
+
+        assertThrows(InvalidOrderTransitionException.class, order::markPaid);
+    }
+
+    @Test
+    void markPaymentFailed_fromPendingPayment_shouldTransitionToPaymentFailed() {
+        Order order = Order.fromCart(Cart.create());
+        order.markPendingPayment();
+
+        order.markPaymentFailed();
+
+        assertEquals(OrderStatus.PAYMENT_FAILED, order.getStatus());
+    }
+
+    @Test
+    void markPaymentFailed_fromCreated_shouldThrow() {
+        Order order = Order.fromCart(Cart.create());
+
+        assertThrows(InvalidOrderTransitionException.class, order::markPaymentFailed);
     }
 }

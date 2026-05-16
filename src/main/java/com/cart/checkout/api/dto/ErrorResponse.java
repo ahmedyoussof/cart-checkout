@@ -1,4 +1,4 @@
-package com.cart.checkout.api;
+package com.cart.checkout.api.dto;
 
 import java.time.Instant;
 

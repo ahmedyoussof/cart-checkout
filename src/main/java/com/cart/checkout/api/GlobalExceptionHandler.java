@@ -1,5 +1,6 @@
 package com.cart.checkout.api;
 
+import com.cart.checkout.api.dto.ErrorResponse;
 import com.cart.checkout.exceptions.CartLockedException;
 import com.cart.checkout.exceptions.InvalidOrderTransitionException;
 import com.cart.checkout.exceptions.InvalidPaymentTransitionException;

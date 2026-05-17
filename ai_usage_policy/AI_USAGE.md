@@ -47,6 +47,7 @@ Decisions I owned. Where the AI suggested alternatives, I overrode them.
 | Design-document drafting | Wrote the prose of `DESIGN.md` from the decisions made across the conversation | Approved the structure; content reflects my decisions |
 | Surfacing implicit invariants | Pointed out optimistic locking, transactional boundaries, "no setters on state" | Accepted — they follow from the "real money" constraint |
 | Flagging sub-questions | Asked about cart-merge, currency invariant, CANCELLED, timestamps, etc. | Made the calls one by one |
+| Postman collection | Drafted `checkout.postman_collection.json` — requests for the four flows (happy path, retry, idempotent webhook, invariants) and inline test assertions | Specified the flows to cover; owned the chaining design — variables capturing `cartId` / `orderId` / `paymentId` from earlier responses so the collection runs end-to-end without manual id pasting |
 
 ## 4. Things I Corrected the AI On
 

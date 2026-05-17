@@ -63,7 +63,8 @@ com.cart.checkout
 └── exceptions/                        // domain exceptions
 ```
 
-Each context layers as **controller → service → repository → aggregate**. Cross-context references are by ID only  no direct aggregate references. Full diagrams and rationale in [ARCHITECTURE.md](ARCHITECTURE.md).
+Each context layers as **controller → service → repository → aggregate**. Cross-context references are by ID only  no direct aggregate references.   
+Full diagrams and rationale in [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ---
 
